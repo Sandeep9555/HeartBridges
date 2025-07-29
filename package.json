@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "client": "vite --host",
+    "prebuild": "chmod +x ./node_modules/.bin/vite",
     "build": "vite build",
     "server": "nodemon  src/index.js",
     "dev": "concurrently \"npm run client\" \"npm run server\""
