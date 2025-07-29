@@ -1,0 +1,49 @@
+{
+  "name": "heartlocal",
+  "version": "1.0.0",
+  "scripts": {
+    "client": "vite --host",
+    "build": "vite build",
+    "server": "nodemon  src/index.js",
+    "dev": "concurrently \"npm run client\" \"npm run server\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/react": "^1.1.1",
+    "@reduxjs/toolkit": "^2.8.2",
+    "axios": "^1.11.0",
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^2.7.0",
+    "concurrently": "^9.2.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.1",
+    "emoji-mart": "^5.6.0",
+    "express": "^5.1.0",
+    "framer-motion": "^12.23.11",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.5",
+    "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0",
+    "nodemon": "^3.1.10",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-icons": "^5.5.0",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.7.1",
+    "react-toastify": "^11.0.5",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "validator": "^13.15.15"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.1",
+    "vite": "^6.3.5"
+  }
+}
