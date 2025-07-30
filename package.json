@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "scripts": {
     "client": "vite --host",
-    "prebuild": "chmod +x ./node_modules/.bin/vite",
     "build": "vite build",
     "server": "nodemon  src/index.js",
     "dev": "concurrently \"npm run client\" \"npm run server\""
@@ -30,8 +29,8 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.10",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^18.2.0",
+"react-dom": "^18.2.0",
     "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.7.1",
