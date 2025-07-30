@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "client": "vite --host",
-    "build": "npx vite build",
+    "build": "node --import vite/build",
     "server": "nodemon  src/index.js",
     "dev": "concurrently \"npm run client\" \"npm run server\""
   },
