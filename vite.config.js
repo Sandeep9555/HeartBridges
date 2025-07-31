@@ -5,7 +5,7 @@ import path from "path";
 export default defineConfig({
   root: path.resolve(__dirname, "src/client"), // safer than "./src/client"
   plugins: [react()],
-  envDir: path.resolve(__dirname),
+  envDir: path.resolve(__dirname, "src/client"),
   build: {
     outDir: "dist", // ✅ This stays inside src/client
     emptyOutDir: true,
