@@ -31,13 +31,13 @@ function App() {
             theme="light"
           />
           <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Singup />} />
             <Route path="/" element={<Body />}>
               <Route path="/" element={<Profile />} />
               <Route path="/feed" element={<Feed />} />
               <Route path="/editprofile" element={<EditProfile />} />
               <Route path="/profile/:userId" element={<UserProfile />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Singup />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/connections" element={<Connections />} />
               <Route path="/requests" element={<Requests />} />
