@@ -2,11 +2,12 @@
   "name": "heartlocal",
   "version": "1.0.0",
   "scripts": {
-  "client": "vite --host --config src/client/vite.config.js",
-  "build": "vite build --config src/client/vite.config.js",
-    "server": "nodemon  src/index.js",
-    "dev": "concurrently \"npm run client\" \"npm run server\""
+ "client": "vite --host --config src/client/vite.config.js",
+  "build": "vite build --config src/client/vite.config.js && cp src/client/public/_redirects src/client/dist/",
+  "server": "nodemon src/index.js",
+  "dev": "concurrently \"npm run client\" \"npm run server\""
   },
+  
   "keywords": [],
   "author": "",
   "license": "ISC",
