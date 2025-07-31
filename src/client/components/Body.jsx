@@ -5,15 +5,15 @@ import axios from "axios";
 import { BASE_URL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../../utils/userSlice";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const Body = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userData = useSelector((store) => store.user);
+  const [loading, setLoading] = useState(true); // NEW ✅
 
   const fetchUser = async () => {
-    if (userData && Object.keys(userData).length) return;
     try {
       const res = await axios.get(BASE_URL + "/profile/view", {
         withCredentials: true,
@@ -24,24 +24,27 @@ const Body = () => {
         navigate("/login");
       }
       console.error("Error fetching user:", err.response || err.message);
+    } finally {
+      setLoading(false); // ✅ done loading whether success or error
     }
   };
 
   useEffect(() => {
-    fetchUser();
+    if (!userData || !Object.keys(userData).length) {
+      fetchUser();
+    } else {
+      setLoading(false);
+    }
   }, []);
+
+  if (loading) return <div className="text-center p-4">Loading...</div>; // ⏳
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Fixed navbar */}
       <NavBar />
-
-      {/* Main content */}
       <main className="flex-grow">
         <Outlet />
       </main>
-
-      {/* Sticky footer */}
       <Footer />
     </div>
   );
