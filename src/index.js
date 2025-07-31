@@ -22,9 +22,10 @@ const PORT = process.env.PORT || 7777;
 
 const onlineUsers = {}; // userId -> socket.id
 
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
-app.set("trust proxy", 1);
+
 console.log(process.env.BASE_URL);
 app.use(
   cors({
