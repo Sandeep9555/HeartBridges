@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
   envDir: path.resolve(__dirname),
   build: {
-    outDir: path.resolve(__dirname, "dist"), // you don’t need ../../../
+    outDir: "dist", // ✅ This stays inside src/client
     emptyOutDir: true,
   },
   server: {
