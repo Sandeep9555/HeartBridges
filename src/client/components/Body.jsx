@@ -57,6 +57,5 @@ const Body = () => {
     </div>
   );
 };
-gu;
 
 export default Body;
