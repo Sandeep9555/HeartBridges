@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
 import axios from "axios";
@@ -10,8 +10,9 @@ import { useEffect, useState } from "react";
 const Body = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ Get current route
   const userData = useSelector((store) => store.user);
-  const [loading, setLoading] = useState(true); // NEW ✅
+  const [loading, setLoading] = useState(true);
 
   const fetchUser = async () => {
     try {
@@ -25,19 +26,26 @@ const Body = () => {
       }
       console.error("Error fetching user:", err.response || err.message);
     } finally {
-      setLoading(false); // ✅ done loading whether success or error
+      setLoading(false);
     }
   };
 
   useEffect(() => {
+    // ✅ Avoid fetching user if route is public
+    const publicPaths = ["/login", "/signup"];
+    if (publicPaths.includes(location.pathname)) {
+      setLoading(false);
+      return;
+    }
+
     if (!userData || !Object.keys(userData).length) {
       fetchUser();
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [location.pathname]);
 
-  if (loading) return <div className="text-center p-4">Loading...</div>; // ⏳
+  if (loading) return <div className="text-center p-4">Loading...</div>;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -49,5 +57,6 @@ const Body = () => {
     </div>
   );
 };
+gu;
 
 export default Body;
