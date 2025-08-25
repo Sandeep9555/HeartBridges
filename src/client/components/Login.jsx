@@ -69,7 +69,7 @@ const Login = () => {
           />
         </div>
 
-        {/* Login Button */}
+        {/* Normal Login Button */}
         <button
           onClick={handleLogin}
           className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded-full transition-all"
@@ -77,6 +77,23 @@ const Login = () => {
           Login
         </button>
 
+        {/* Divider */}
+        <div className="flex items-center my-4">
+          <div className="flex-grow border-t border-gray-300"></div>
+          <span className="mx-2 text-gray-400 text-sm">OR</span>
+          <div className="flex-grow border-t border-gray-300"></div>
+        </div>
+
+        <a href="https://heartbridges-backend.onrender.com/google">
+          <button className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full transition-all mt-2">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+              alt="Google"
+              className="w-5 h-5"
+            />
+            Login with Google
+          </button>
+        </a>
         {/* Toggle to Sign Up */}
         <p
           onClick={() => navigate("/signup")}

@@ -1,9 +1,10 @@
 const express = require("express");
 const http = require("http");
 const path = require("path");
+const passport = require("passport");
+const session = require("express-session");
 const connectDB = require("./config/database");
 const uploadRoute = require("./routes/uploadRoutes");
-const app = express();
 const cookieParser = require("cookie-parser");
 const { Server } = require("socket.io");
 const cors = require("cors");
@@ -15,12 +16,12 @@ const requestRouter = require("./routes/requestRoutes");
 const userRouter = require("./routes/userRoutes");
 const messageRouter = require("./routes/messageRoutes");
 
-const Message = require("./models/message");
+const initializeSocket = require("./socket");
+const redisClient = require("./config/redisClient"); // ✅ Import Redis client
 
+const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 7777;
-
-const onlineUsers = {}; // userId -> socket.id
 
 app.set("trust proxy", 1);
 app.use(express.json());
@@ -44,6 +45,17 @@ const io = new Server(server, {
 });
 
 // ✅ API routes
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "supersecret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 24 * 60 * 60 * 1000 },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
@@ -57,135 +69,28 @@ app.use(express.static(path.join(__dirname, "../client/dist")));
 //   res.sendFile(path.join(__dirname, "../client/dist/index.html"));
 // });
 
-// ✅ Socket.IO setup
-io.on("connection", (socket) => {
-  // ✅ Handle user going online
-  socket.on("userOnline", async (userId) => {
-    if (!userId) return;
-    onlineUsers[userId] = socket.id;
-    io.emit("userOnlineStatus", { userId, isOnline: true });
-    socket.join(userId);
-
-    // ✅ Send undelivered messages (one-time delivery)
-    try {
-      const undeliveredMessages = await Message.find({
-        receiver: userId,
-        delivered: false,
-      });
-
-      if (undeliveredMessages.length > 0) {
-        for (const msg of undeliveredMessages) {
-          io.to(userId).emit("receive_message", msg);
-        }
-
-        await Message.updateMany(
-          { receiver: userId, delivered: false },
-          { $set: { delivered: true } }
-        );
-      }
-    } catch (err) {
-      console.error("❌ Failed to send undelivered messages:", err);
-    }
-
-    try {
-      const recentSenders = await Message.find({
-        receiver: userId,
-      }).distinct("sender");
-
-      recentSenders.forEach((senderId) => {
-        const senderSocket = onlineUsers[senderId];
-        if (senderSocket && senderId != userId) {
-          io.to(senderSocket).emit("user_now_online_notification", {
-            userId,
-          });
-        }
-      });
-    } catch (err) {
-      console.log("X Failed to notify recent senders:", err);
-    }
-  });
-
-  // ✅ Real-time message send
-  socket.on("send_message", async (message) => {
-    const {
-      _id,
-      sender,
-      receiver,
-      content,
-      messageType,
-      createdAt,
-      read,
-      delivered,
-    } = message;
-
-    if (!sender || !receiver) return;
-
-    // 🚫 Don't emit to sender again (already handled client-side)
-    if (onlineUsers[receiver]) {
-      io.to(onlineUsers[receiver]).emit("receive_message", {
-        _id,
-        sender,
-        receiver,
-        content,
-        messageType,
-        createdAt,
-        read: true,
-        delivered: true,
-        connectionId: sender, // 👉 Pass sender as connectionId for receiver
-      });
-
-      try {
-        await Message.findByIdAndUpdate(_id, {
-          $set: {
-            delivered: true,
-          },
-        });
-      } catch (err) {
-        console.error("x Failed to update delivered status:", err);
-      }
-    }
-    if (onlineUsers[receiver] && onlineUsers[sender]) {
-      io.to(onlineUsers[sender]).emit("message_delivered", {
-        messageId: _id,
-        receiverId: receiver,
-      });
-    }
-  });
-
-  // ✅ Typing indicator
-  socket.on("typing", ({ senderId, receiverId, isTyping }) => {
-    if (onlineUsers[receiverId]) {
-      io.to(onlineUsers[receiverId]).emit("typing", {
-        senderId,
-        isTyping,
-      });
-    }
-  });
-  //getCurrently online users
-  socket.on("getOnlineUsers", () => {
-    socket.emit("userOnlineStatus", Object.keys(onlineUsers));
-  });
-  // ✅ Handle disconnect
-  socket.on("disconnect", () => {
-    const disconnectedUser = Object.keys(onlineUsers).find(
-      (key) => onlineUsers[key] === socket.id
-    );
-    if (disconnectedUser) {
-      delete onlineUsers[disconnectedUser];
-      io.emit("userOnlineStatus", {
-        userId: disconnectedUser,
-        isOnline: false,
-      });
-    }
-  });
-});
+// ✅ Socket.IO setup with Redis (no in-memory onlineUsers)
+initializeSocket(io);
 
 // ✅ Start server
 connectDB()
-  .then(() => {
-    server.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
-    });
+  .then(async () => {
+    try {
+      if (!redisClient.isOpen) {
+        await redisClient.connect();
+      }
+      console.log("✅ Redis connected");
+
+      // ✅ Socket needs Redis, so init AFTER connecting
+      initializeSocket(io);
+
+      server.listen(PORT, () => {
+        console.log(`🚀 Server running at http://localhost:${PORT}`);
+      });
+    } catch (err) {
+      console.error("❌ Redis connection failed:", err);
+      process.exit(1);
+    }
   })
   .catch((err) => {
     console.error("❌ DB connection failed:", err);

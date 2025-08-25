@@ -28,12 +28,22 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
-      validate(value) {
-        if (!validator.isStrongPassword(value)) {
-          throw new Error("Enter a Strong Password: " + value);
-        }
+      //required: true,
+      validate: {
+        validator: function (value) {
+          // Only validate strong password if local user (no githubId)
+          if (!this.githubId && value && !validator.isStrongPassword(value)) {
+            throw new Error("Enter a Strong Password: " + value);
+          }
+          return true;
+        },
       },
+    },
+    githubId: {
+      type: String, // optional
+    },
+    googleId: {
+      type: String,
     },
     age: {
       type: Number,
@@ -76,6 +86,12 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.pre("save", function (next) {
+  if (!this.githubId && !this.googleId && !this.password) {
+    return next(new Error("Password required for local users"));
+  }
+  next();
+});
 userSchema.methods.getJWT = async function () {
   const user = this;
 
