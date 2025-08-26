@@ -79,7 +79,7 @@ authRouter.get(
   }),
   (req, res) => {
     sendToken(res, req.user);
-    res.redirect(`${process.env.BASE_URL}/profile`);
+    res.redirect(`${process.env.BASE_URL}`);
   }
 );
 
